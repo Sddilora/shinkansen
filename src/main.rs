@@ -5,12 +5,13 @@ use uuid::Uuid;
 use std::path::Path;
 
 // Define the `upload` function with the `post` attribute
-#[post("/upoad", format = "plain", data = "<file>")]
+#[post("/upload", format = "application/pdf", data = "<file>")]
 async fn upload(mut file: TempFile<'_>) -> std::io::Result<()> {
     let id = Uuid::new_v4();
     let form = format!("./files/{}", id.to_string());
     let path = Path::new(&form);
-    file.persist_to(path).await
+    file.persist_to(path).await?;
+    Ok(())
 }
 
 // Define the `download` function with the `get` attribute
@@ -39,7 +40,7 @@ fn list() -> &'static str {
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![
+    rocket::build().mount("/v1", routes![
         upload,
         download,
         delete,
